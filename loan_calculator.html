@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>贷款月供计算器</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 24px; background:#f6f8fa; color:#111; }
+    .card { max-width:600px; margin:0 auto; background:#fff; padding:20px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
+    h1 { font-size:20px; margin:0 0 12px; }
+    label { display:block; margin:10px 0 6px; font-weight:600; }
+    input[type="number"] { width:100%; padding:10px; font-size:16px; border:1px solid #dfe3e8; border-radius:6px; box-sizing:border-box; }
+    .row { display:flex; gap:12px; }
+    .row > div { flex:1 }
+    button { margin-top:14px; padding:10px 14px; font-size:16px; border:none; border-radius:6px; background:#0b69ff; color:#fff; cursor:pointer }
+    button:active { transform:translateY(1px) }
+    .result { margin-top:16px; padding:12px; background:#f1f7ff; border-radius:6px; border:1px solid #dbeeff }
+    .muted { color:#556; font-size:14px }
+    .prepay-entry { background:#fff; border:1px solid #e6f0ff; padding:10px; border-radius:6px; }
+    .prepay-grid { display:flex; gap:12px; flex-wrap:wrap; }
+    .prepay-grid > div { flex:1; min-width:120px }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>贷款提前还款计算器</h1>
+    <div class="muted">输入贷款总额、贷款年限和年利率（%），点击计算查看每月需要还款金额。</div>
+
+    <label for="amount">贷款总额（元）</label>
+    <input id="amount" type="number" min="0" step="250" placeholder="例如：500000">
+
+    <div class="row">
+      <div>
+        <label>贷款期限输入方式</label>
+        <div class="row" style="margin-top:6px">
+          <div>
+            <label style="font-weight:600; font-size:12px"><input id="termTypeYears" name="termType" type="radio" value="years" checked> 按年</label>
+          </div>
+          <div>
+            <label style="font-weight:600; font-size:12px"><input id="termTypeMonths" name="termType" type="radio" value="months"> 按期（月）</label>
+          </div>
+        </div>
+        <input id="years" type="number" min="0" step="1" placeholder="例如：20" style="margin-top:8px">
+        <input id="months" type="number" min="0" step="1" placeholder="例如：240" style="margin-top:8px; display:none">
+      </div>
+      <div>
+        <label for="rate">年利率（%）</label>
+        <input id="rate" type="number" min="0" step="0.01" placeholder="例如：3.5">
+      </div>
+    </div>
+
+    <button id="calc">计算月供</button>
+
+    <div style="margin-top:12px; border-top:1px dashed #e6eefb; padding-top:12px">
+      <label><input id="enablePrepay" type="checkbox" > 启用提前还款</label>
+      <div id="prepayPanel" style="display:none; margin-top:8px">
+        <div class="row">
+          <div>
+            <label for="prepayYear">提前还款在第几期(月)、还款金额(元)</label>
+            <table id="prepayYear">
+              <tr><td><input name="prepayMonths" type="number" min="6" step="1" placeholder="第1次"></td><td style="padding-left:8px"><input name="prepayAmount"  type="number" min="0" step="250" placeholder="例如：50000"></td></tr>
+              <tr><td><input name="prepayMonths" type="number" min="18" step="1" placeholder="第2次"></td><td style="padding-left:8px"><input name="prepayAmount" type="number" min="0" step="250" placeholder="例如：50000"></td></tr>
+              <tr><td><input name="prepayMonths" type="number" min="30" step="1" placeholder="第3次"></td><td style="padding-left:8px"><input name="prepayAmount" type="number" min="0" step="250" placeholder="例如：50000"></td></tr>
+              <tr><td><input name="prepayMonths" type="number" min="42" step="1" placeholder="第4次"></td><td style="padding-left:8px"><input name="prepayAmount" type="number" min="0" step="250" placeholder="例如：50000"></td></tr>
+              <tr><td><input name="prepayMonths" type="number" min="54" step="1" placeholder="第5次"></td><td style="padding-left:8px"><input name="prepayAmount" type="number" min="0" step="250" placeholder="例如：50000"></td></tr>
+              <tr><td><input name="prepayMonths" type="number" min="66" step="1" placeholder="第6次"></td><td style="padding-left:8px"><input name="prepayAmount" type="number" min="0" step="250" placeholder="例如：50000"></td></tr>
+              <tr><td><input name="prepayMonths" type="number" min="78" step="1" placeholder="第7次"></td><td style="padding-left:8px"><input name="prepayAmount" type="number" min="0" step="250" placeholder="例如：50000"></td></tr>
+              <tr><td><input name="prepayMonths" type="number" min="90" step="1" placeholder="第8次"></td><td style="padding-left:8px"><input name="prepayAmount" type="number" min="0" step="250" placeholder="例如：50000"></td></tr>
+              <tr><td><input name="prepayMonths" type="number" min="102" step="1" placeholder="第9次"></td><td style="padding-left:8px"><input name="prepayAmount" type="number" min="0" step="250" placeholder="例如：50000"></td></tr>
+              <tr><td><input name="prepayMonths" type="number" min="114" step="1" placeholder="第10次"></td><td style="padding-left:8px"><input name="prepayAmount" type="number" min="0" step="250" placeholder="例如：50000"></td></tr>
+            </table>
+          </div>
+      
+        </div>
+        <div class="muted">提前还款后月供基本不变，系统会计算剩余期数。</div>
+      </div>
+    </div>
+
+    <div id="output" class="result" aria-live="polite" style="display:none">
+      <div><strong>原始每月月供：</strong><span id="monthly"></span></div>
+      <div><strong>还款总额：</strong><span id="total"></span></div>
+      <div><strong>支付利息总额：</strong><span id="interest"></span></div>
+      <hr style="margin:12px 0; border-color:#dbeeff">
+
+      <div class="afterPrepay" style="margin-top:10px; display:none; border-top:1px dashed #dbeeff; padding-top:8px">
+        <div><strong>第1次提前还款后剩余月供：</strong><span class="monthlyAfter"></span></div>
+        <div><strong>第1次提前还款后剩余期数（月）：</strong><span class="remainingMonths"></span></div>
+        <div><strong>第1次提前还款后剩余年限（约）：</strong><span class="remainingYears"></span></div>
+      </div>
+
+      <div class="afterPrepay" style="margin-top:10px; display:none; border-top:1px dashed #dbeeff; padding-top:8px">
+        <div><strong>第2次提前还款后剩余月供：</strong><span class="monthlyAfter"></span></div>
+        <div><strong>第2次提前还款后剩余期数（月）：</strong><span class="remainingMonths"></span></div>
+        <div><strong>第2次提前还款后剩余年限（约）：</strong><span class="remainingYears"></span></div>
+      </div>
+
+      <div class="afterPrepay" style="margin-top:10px; display:none; border-top:1px dashed #dbeeff; padding-top:8px">
+        <div><strong>第3次提前还款后剩余月供：</strong><span class="monthlyAfter"></span></div>
+        <div><strong>第3次提前还款后剩余期数（月）：</strong><span class="remainingMonths"></span></div>
+        <div><strong>第3次提前还款后剩余年限（约）：</strong><span class="remainingYears"></span></div>
+      </div>
+
+      <div class="afterPrepay" style="margin-top:10px; display:none; border-top:1px dashed #dbeeff; padding-top:8px">
+        <div><strong>第4次提前还款后剩余月供：</strong><span class="monthlyAfter"></span></div>
+        <div><strong>第4次提前还款后剩余期数（月）：</strong><span class="remainingMonths"></span></div>
+        <div><strong>第4次提前还款后剩余年限（约）：</strong><span class="remainingYears"></span></div>
+      </div>
+
+      <div class="afterPrepay" style="margin-top:10px; display:none; border-top:1px dashed #dbeeff; padding-top:8px">
+        <div><strong>第5次提前还款后剩余月供：</strong><span class="monthlyAfter"></span></div>
+        <div><strong>第5次提前还款后剩余期数（月）：</strong><span class="remainingMonths"></span></div>
+        <div><strong>第5次提前还款后剩余年限（约）：</strong><span class="remainingYears"></span></div>
+      </div>
+
+      <div class="afterPrepay" style="margin-top:10px; display:none; border-top:1px dashed #dbeeff; padding-top:8px">
+        <div><strong>第6次提前还款后剩余月供：</strong><span class="monthlyAfter"></span></div>
+        <div><strong>第6次提前还款后剩余期数（月）：</strong><span class="remainingMonths"></span></div>
+        <div><strong>第6次提前还款后剩余年限（约）：</strong><span class="remainingYears"></span></div>
+      </div>
+
+      <div class="afterPrepay" style="margin-top:10px; display:none; border-top:1px dashed #dbeeff; padding-top:8px">
+        <div><strong>第7次提前还款后剩余月供：</strong><span class="monthlyAfter"></span></div>
+        <div><strong>第7次提前还款后剩余期数（月）：</strong><span class="remainingMonths"></span></div>
+        <div><strong>第7次提前还款后剩余年限（约）：</strong><span class="remainingYears"></span></div>
+      </div>
+
+      <div class="afterPrepay" style="margin-top:10px; display:none; border-top:1px dashed #dbeeff; padding-top:8px">
+        <div><strong>第8次提前还款后剩余月供：</strong><span class="monthlyAfter"></span></div>
+        <div><strong>第8次提前还款后剩余期数（月）：</strong><span class="remainingMonths"></span></div>
+        <div><strong>第8次提前还款后剩余年限（约）：</strong><span class="remainingYears"></span></div>
+      </div>
+
+      <div class="afterPrepay" style="margin-top:10px; display:none; border-top:1px dashed #dbeeff; padding-top:8px">
+        <div><strong>第9次提前还款后剩余月供：</strong><span class="monthlyAfter"></span></div>
+        <div><strong>第9次提前还款后剩余期数（月）：</strong><span class="remainingMonths"></span></div>
+        <div><strong>第9次提前还款后剩余年限（约）：</strong><span class="remainingYears"></span></div>
+      </div>
+
+      <div class="afterPrepay" style="margin-top:10px; display:none; border-top:1px dashed #dbeeff; padding-top:8px">
+        <div><strong>第10次提前还款后剩余月供：</strong><span class="monthlyAfter"></span></div>
+        <div><strong>第10次提前还款后剩余期数（月）：</strong><span class="remainingMonths"></span></div>
+        <div><strong>第10次提前还款后剩余年限（约）：</strong><span class="remainingYears"></span></div>
+      </div>
+
+      <div class="afterPrepay" aria-live="polite" style="margin-top:10px; display:none; border-top:1px dashed #dbeeff; padding-top:8px">
+        <div><strong>提前还款后剩余本金：</strong><span id="lastTotal"></span></div>
+        <div><strong>实际支付利息总额：</strong><span id="lastInterest"></span></div>
+      </div>
+    </div>
+  <script>
+    function fmt(v){ return Number(v).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});}//格式化函数
+    /*贷款月供计算器*/
+    function loanPayment(p, r, n){
+      if (r <= 0) return p / n;
+      const factor = Math.pow(1 + r, n);
+      return p * r * factor / (factor - 1);
+    }/*月供公式 ,利率是月利率,n是期数,利率为负数时按0算*/
+
+    function monthLast(p, r, monthly){
+      if (r <= 0) return Math.ceil(p / monthly);
+      const denom = monthly - r * p;
+      if (denom <= 0) return Infinity; // 月供不足以覆盖利息
+      const val = monthly / denom;
+      return Math.ceil(Math.log(val) / Math.log(1 + r));
+    }/*剩余期数公式,利率是月利率,利率为负数时按0算*/
+
+    function lastP(r,lastM, monthly){
+      if (r <= 0) return monthly * lastM;
+      const m = Math.pow(1 + r, lastM);
+      return monthly * ( 1 - 1/m ) / r;
+    }/*剩余本金简易公式，根据月供及剩余期数推剩余本金,利率是月利率,利率为负数时按0算*/
+
+  
+    function calculate(){
+      const P = parseFloat(document.getElementById('amount').value);
+      const termTypeYears = document.getElementById('termTypeYears').checked;
+      const years = parseFloat(document.getElementById('years').value);
+      const monthsInput = parseFloat(document.getElementById('months').value);
+      const annualRate = parseFloat(document.getElementById('rate').value);
+
+      if (!isFinite(P) || P <= 0) { alert('请输入有效的贷款总额'); return; }
+      let n;
+      if (termTypeYears) {//如果按年输入，则转换为月数
+        if (!isFinite(years) || years <= 0) { alert('请输入有效的贷款年限'); return; }
+        n = Math.round(years * 12);
+      } else {
+        if (!isFinite(monthsInput) || monthsInput <= 0) { alert('请输入有效的贷款期数(月)'); return; }
+        n = Math.round(monthsInput);
+      }
+      if (!isFinite(annualRate) || annualRate < 0) { alert('请输入有效的年利率'); return; }
+
+      const r = annualRate / 100 / 12; // 月利率
+      let monthly;
+      if (r <= 0) monthly = P / n;
+      else monthly =loanPayment(P, r, n);
+
+      const originalTotal = monthly * n;
+      const originalInterest = originalTotal - P;
+
+      document.getElementById('monthly').textContent = fmt(monthly) + ' 元';
+      document.getElementById('total').textContent = fmt(originalTotal) + ' 元';
+      document.getElementById('interest').textContent = fmt(originalInterest) + ' 元';
+      document.getElementById('output').style.display = 'block';
+
+      const afterPrepayDiv = document.querySelectorAll('.afterPrepay');//提前还款后显示的div
+
+      if (!document.getElementById('enablePrepay').checked){
+        afterPrepayDiv.forEach(div => div.style.display = 'none'); return; }
+
+      let totalAmount = 0;//累计还款金额
+      let previousMonth;//上一次提前还款的期数总和
+
+      for (let i=0;i<10;i++){
+        const prepayMonthInput = document.getElementsByName('prepayMonths')[i];
+        const prepayAmountInput = document.getElementsByName('prepayAmount')[i];
+        const prepayMonth = parseFloat(prepayMonthInput.value);//提前还款期数
+        const prepayAmount = parseFloat(prepayAmountInput.value);//提前还款金额
+
+        previousMonth = i>0?parseFloat(document.getElementsByName('prepayMonths')[i-1].value): 0;//累计提前还款的期数总和
+        totalAmount +=prepayAmount 
+        totalAmount += (i>0 && isFinite(prepayAmount) && prepayAmount > 0) ? (prepayMonth - previousMonth )* monthly : prepayMonth* monthly;
+        //累计还款金额=本次提前还款金额+之前累计还款金额
+
+        if (!isFinite(prepayMonth) || prepayMonth <= 0 || !isFinite(prepayAmount) || prepayAmount <= 0) {
+          afterPrepayDiv[i].style.display = 'none'; continue; // 跳过无效输入
+        }
+        if (prepayMonth >= n +previousMonth) {
+          alert(`第${i+1}次提前还款的期数必须小于总期数(${n +previousMonth})`); afterPrepayDiv[i].style.display = 'none'; continue;
+        }
+        if (prepayAmount >= P) {
+          alert(`第${i+1}次提前还款金额必须小于贷款总额(${fmt(P)}元)`); afterPrepayDiv[i].style.display = 'none'; continue;
+        }
+
+        // 计算提前还款后剩余本金
+        const lastPBeforePrepay = lastP(r, n - Math.ceil(prepayMonth) +previousMonth, monthly);//当前剩余本金
+        const remainingP = lastPBeforePrepay - prepayAmount;//剩余本金=提前还款前剩余本金-提前还款金额
+        if (remainingP <= 0) {
+          n=monthLast(lastPBeforePrepay, r, monthly);//当前剩余期数
+          monthly=loanPayment(lastPBeforePrepay, r, n);//月供为
+          totalAmount += monthly * n;//累计还款金额加上剩余月供*剩余期数
+
+          afterPrepayDiv[i].querySelector('.monthlyAfter').textContent =fmt(monthly) + ' 元';
+          afterPrepayDiv[i].querySelector('.remainingMonths').textContent = fmt(n) + ' 月';
+          afterPrepayDiv[i].querySelector('.remainingYears').textContent = (n / 12).toFixed(1) + ' 年';
+          
+          document.getElementById('lastTotal').textContent = '0 元';//提前还款后剩余本金
+          document.getElementById('lastInterest').textContent = fmt(totalAmount - P) + ' 元';
+          //实际支付利息总额=计还款金额-贷款总额累
+          afterPrepayDiv[i].style.display = 'block';
+          break;
+        
+        } // 提前还款金额过大导致剩余本金为0或负数
+
+        // 计算提前还款后剩余期数
+        n = monthLast(remainingP, r, monthly);//剩余期数=月供公式的反函数，根据剩余本金、月利率和月供计算剩余期数
+        monthly = loanPayment(remainingP, r, n);//提前还款后月供基本不变，计算剩余期数对应的月供
+        const remainingYears = (n / 12).toFixed(1);
+        //totalAmount += (isFinite(prepayAmount) && prepayAmount > 0 ? prepayAmount: 0) ;//累计还款金额=之前累计还款金额+本次提前还款金额+剩余月供*剩余期数
+
+        afterPrepayDiv[i].querySelector('.monthlyAfter').textContent = fmt(monthly) + ' 元';
+        afterPrepayDiv[i].querySelector('.remainingMonths').textContent = n + ' 月';
+        afterPrepayDiv[i].querySelector('.remainingYears').textContent = remainingYears + ' 年';
+        afterPrepayDiv[i].style.display = 'block';
+
+        document.getElementById('lastTotal').textContent = fmt(remainingP) + ' 元';//提前还款后剩余本金
+        document.getElementById('lastInterest').textContent = fmt(totalAmount + monthly*n - P) + ' 元';//实际支付利息总额：id="lastInterest"
+      }
+      afterPrepayDiv[10].style.display = 'block';
+    }
+
+    document.getElementById('calc').addEventListener('click', calculate);
+
+    // 切换年/月输入显示
+    function updateTermInputs(){
+      const isYears = document.getElementById('termTypeYears').checked;
+      document.getElementById('years').style.display = isYears ? 'block' : 'none';
+      document.getElementById('months').style.display = isYears ? 'none' : 'block';
+    }
+    document.getElementById('termTypeYears').addEventListener('change', updateTermInputs);
+    document.getElementById('termTypeMonths').addEventListener('change', updateTermInputs);
+
+    // 启用/禁用提前还款面板
+    document.getElementById('enablePrepay').addEventListener('change', (e)=>{
+      document.getElementById('prepayPanel').style.display = e.target.checked ? 'block' : 'none';
+    });
+
+    // 支持按回车在任一输入框触发计算（含动态添加的提前还款字段）
+    ['amount','years','months','rate'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('keydown', (e)=>{ if (e.key === 'Enter') calculate(); });
+    });
+
+    // 初始化显示
+    updateTermInputs();
+  </script>
